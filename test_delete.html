@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Delete Maintenance</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        #log { background: #f5f5f5; padding: 10px; border-radius: 5px; max-height: 400px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>Test Delete Maintenance Functionality</h1>
+    
+    <div class="test-section">
+        <h3>Step 1: Login</h3>
+        <input type="text" id="username" placeholder="Username" value="testuser">
+        <input type="password" id="password" placeholder="Password" value="testpass123">
+        <button onclick="login()">Login</button>
+        <div id="loginStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Step 2: Create Test Maintenance Request</h3>
+        <button onclick="createMaintenance()">Create Test Maintenance</button>
+        <div id="createStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Step 3: Complete Maintenance Request</h3>
+        <button onclick="completeMaintenance()">Complete Maintenance</button>
+        <div id="completeStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Step 4: Delete Maintenance Request</h3>
+        <button onclick="deleteMaintenance()">Delete Maintenance</button>
+        <div id="deleteStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Step 5: List All Maintenance Requests</h3>
+        <button onclick="listMaintenance()">List Maintenance</button>
+        <div id="listStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Auto Test (All Steps)</h3>
+        <button onclick="runFullTest()">Run Full Test</button>
+        <div id="fullTestStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Console Log</h3>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+        let authToken = null;
+        let currentMaintenanceId = null;
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div class="${type}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_BASE}${endpoint}`;
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+                },
+                ...options
+            };
+            
+            log(`Making ${options.method || 'GET'} request to ${url}`);
+            
+            try {
+                const response = await fetch(url, config);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'API request failed');
+                }
+                
+                log(`Request successful: ${JSON.stringify(data)}`, 'success');
+                return data;
+            } catch (error) {
+                log(`Request failed: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+        
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const data = await apiCall('/api/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                authToken = data.token;
+                document.getElementById('loginStatus').innerHTML = '<span class="success">Login successful!</span>';
+                log('Login successful, token received');
+            } catch (error) {
+                document.getElementById('loginStatus').innerHTML = `<span class="error">Login failed: ${error.message}</span>`;
+            }
+        }
+        
+        async function createMaintenance() {
+            if (!authToken) {
+                log('Please login first', 'error');
+                return;
+            }
+            
+            try {
+                const data = await apiCall('/api/maintenance', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        title: 'Test Delete Maintenance',
+                        description: 'This is a test maintenance request for deletion',
+                        priority: 'low'
+                    })
+                });
+                
+                currentMaintenanceId = data.id;
+                document.getElementById('createStatus').innerHTML = `<span class="success">Created maintenance request with ID: ${data.id}</span>`;
+                log(`Created maintenance request with ID: ${data.id}`);
+            } catch (error) {
+                document.getElementById('createStatus').innerHTML = `<span class="error">Failed to create: ${error.message}</span>`;
+            }
+        }
+        
+        async function completeMaintenance() {
+            if (!authToken || !currentMaintenanceId) {
+                log('Please login and create a maintenance request first', 'error');
+                return;
+            }
+            
+            try {
+                await apiCall(`/api/maintenance/${currentMaintenanceId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        status: 'completed',
+                        completed_at: new Date().toISOString()
+                    })
+                });
+                
+                document.getElementById('completeStatus').innerHTML = '<span class="success">Maintenance request completed!</span>';
+                log('Maintenance request completed');
+            } catch (error) {
+                document.getElementById('completeStatus').innerHTML = `<span class="error">Failed to complete: ${error.message}</span>`;
+            }
+        }
+        
+        async function deleteMaintenance() {
+            if (!authToken || !currentMaintenanceId) {
+                log('Please login and create a maintenance request first', 'error');
+                return;
+            }
+            
+            try {
+                await apiCall(`/api/maintenance/${currentMaintenanceId}`, {
+                    method: 'DELETE'
+                });
+                
+                document.getElementById('deleteStatus').innerHTML = '<span class="success">Maintenance request deleted!</span>';
+                log('Maintenance request deleted successfully');
+                currentMaintenanceId = null;
+            } catch (error) {
+                document.getElementById('deleteStatus').innerHTML = `<span class="error">Failed to delete: ${error.message}</span>`;
+            }
+        }
+        
+        async function listMaintenance() {
+            if (!authToken) {
+                log('Please login first', 'error');
+                return;
+            }
+            
+            try {
+                const data = await apiCall('/api/maintenance');
+                document.getElementById('listStatus').innerHTML = `<span class="success">Found ${data.length} maintenance requests</span>`;
+                log(`Found ${data.length} maintenance requests: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                document.getElementById('listStatus').innerHTML = `<span class="error">Failed to list: ${error.message}</span>`;
+            }
+        }
+        
+        async function runFullTest() {
+            log('=== Starting Full Test ===');
+            
+            try {
+                // Step 1: Login
+                await login();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Step 2: Create maintenance
+                await createMaintenance();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Step 3: Complete maintenance
+                await completeMaintenance();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Step 4: Delete maintenance
+                await deleteMaintenance();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Step 5: List maintenance
+                await listMaintenance();
+                
+                log('=== Full Test Completed Successfully ===', 'success');
+                document.getElementById('fullTestStatus').innerHTML = '<span class="success">Full test completed successfully!</span>';
+            } catch (error) {
+                log(`Full test failed: ${error.message}`, 'error');
+                document.getElementById('fullTestStatus').innerHTML = `<span class="error">Full test failed: ${error.message}</span>`;
+            }
+        }
+    </script>
+</body>
+</html> 

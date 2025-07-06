@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Management - Admin Panel</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="modal" style="display: block;">
+        <div class="modal-content">
+            <div class="auth-container">
+                <div class="auth-form">
+                    <h2 style="color: #dc3545;">Admin Panel Access</h2>
+                    <form id="adminLoginForm">
+                        <div class="form-group">
+                            <label for="adminUsername">Admin Username</label>
+                            <input type="text" id="adminUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminPassword">Admin Password</label>
+                            <input type="password" id="adminPassword" required>
+                        </div>
+                        <button type="submit" class="btn-primary" style="background: #dc3545;">Access Admin Panel</button>
+                    </form>
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <a href="index.html" style="color: #667eea; text-decoration: none;">
+                            <i class="fas fa-arrow-left"></i> Back to User Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminApp" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-shield-alt" style="color: #dc3545;"></i>
+                    <h1>Admin Panel</h1>
+                </div>
+                <nav class="nav">
+                    <button class="nav-btn active" onclick="showAdminSection('dashboard')">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard
+                    </button>
+                    <button class="nav-btn" onclick="showAdminSection('users')">
+                        <i class="fas fa-users"></i>
+                        User Management
+                    </button>
+                    <button class="nav-btn" onclick="showAdminSection('data')">
+                        <i class="fas fa-database"></i>
+                        Data Management
+                    </button>
+                    <button class="nav-btn" onclick="showAdminSection('system')">
+                        <i class="fas fa-cog"></i>
+                        System
+                    </button>
+                </nav>
+                <div class="user-menu">
+                    <span id="adminUserInfo"></span>
+                    <button onclick="adminLogout()" class="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Admin Dashboard Section -->
+            <section id="adminDashboard" class="section active">
+                <div class="section-header">
+                    <h2>Admin Dashboard</h2>
+                    <p>System overview and administration</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalUsers">0</h3>
+                            <p>Total Users</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalProperties">0</h3>
+                            <p>Total Properties</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-friends"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalTenants">0</h3>
+                            <p>Total Tenants</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalMaintenance">0</h3>
+                            <p>Maintenance Requests</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalFinancial">0</h3>
+                            <p>Financial Records</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalRentTracking">0</h3>
+                            <p>Rent Tracking</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-actions">
+                    <div class="admin-card">
+                        <h3>Quick Actions</h3>
+                        <p>Common administrative tasks</p>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button onclick="showAdminSection('users')" class="btn-secondary">
+                                <i class="fas fa-users"></i>
+                                Manage Users
+                            </button>
+                            <button onclick="showAdminSection('data')" class="btn-secondary">
+                                <i class="fas fa-database"></i>
+                                Manage Data
+                            </button>
+                            <button onclick="showSystemInfo()" class="btn-secondary">
+                                <i class="fas fa-info-circle"></i>
+                                System Info
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- User Management Section -->
+            <section id="userManagement" class="section">
+                <div class="section-header">
+                    <h2>User Management</h2>
+                    <p>Manage all system users</p>
+                </div>
+                
+                <div class="filters">
+                    <input type="text" id="userSearch" placeholder="Search users..." class="search-input">
+                    <select id="userRoleFilter" class="filter-select">
+                        <option value="">All Roles</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Created</th>
+                                <th>Last Login</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Users will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Data Management Section -->
+            <section id="dataManagement" class="section">
+                <div class="section-header">
+                    <h2>Data Management</h2>
+                    <p>Manage system data and reset operations</p>
+                </div>
+                
+                <div class="admin-actions">
+                    <div class="admin-card">
+                        <h3>Reset All Data</h3>
+                        <p>Delete all user data from the entire system</p>
+                        <button onclick="showResetAllDataModal()" class="btn-danger">
+                            <i class="fas fa-trash-alt"></i>
+                            Reset All Data
+                        </button>
+                    </div>
+                    
+                    <div class="admin-card">
+                        <h3>Reset Individual User Data</h3>
+                        <p>Delete data for a specific user</p>
+                        <div class="form-group">
+                            <label for="userSelect">Select User:</label>
+                            <select id="userSelect" class="form-control">
+                                <option value="">Choose a user...</option>
+                            </select>
+                        </div>
+                        <button onclick="showResetUserDataModal()" class="btn-danger">
+                            <i class="fas fa-user-times"></i>
+                            Reset User Data
+                        </button>
+                    </div>
+                    
+                    <div class="admin-card">
+                        <h3>Delete User Account</h3>
+                        <p>Permanently delete a user account and all their data</p>
+                        <div class="form-group">
+                            <label for="deleteUserSelect">Select User:</label>
+                            <select id="deleteUserSelect" class="form-control">
+                                <option value="">Choose a user...</option>
+                            </select>
+                        </div>
+                        <button onclick="showDeleteUserModal()" class="btn-danger">
+                            <i class="fas fa-user-slash"></i>
+                            Delete User Account
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- System Section -->
+            <section id="systemSection" class="section">
+                <div class="section-header">
+                    <h2>System Information</h2>
+                    <p>System details and configuration</p>
+                </div>
+                
+                <div class="admin-actions">
+                    <div class="admin-card">
+                        <h3>System Status</h3>
+                        <div id="systemInfo" class="system-info">
+                            <!-- System info will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="admin-card">
+                        <h3>Database Statistics</h3>
+                        <div id="databaseStats" class="system-info">
+                            <!-- Database stats will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html> 

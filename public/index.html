@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Management System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login/Register Modal -->
+    <div id="authModal" class="modal" style="display: block;">
+        <div class="modal-content">
+            <div class="auth-container">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="showAuthTab('login')">Login</button>
+                    <button class="auth-tab" onclick="showAuthTab('register')">Register</button>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form">
+                    <h2>Welcome Back</h2>
+                    <div class="form-group">
+                        <label for="loginUsername">Username</label>
+                        <input type="text" id="loginUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Login</button>
+                </form>
+                
+                <!-- Register Form -->
+                <form id="registerForm" class="auth-form" style="display: none;">
+                    <h2>Create Account</h2>
+                    <div class="form-group">
+                        <label for="registerUsername">Username</label>
+                        <input type="text" id="registerUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-building"></i>
+                    <h1>CodCoder Property Manager</h1>
+                </div>
+                <nav class="nav">
+                    <button class="nav-btn active" onclick="showSection('dashboard')">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard
+                    </button>
+                    <button class="nav-btn" onclick="showSection('properties')">
+                        <i class="fas fa-home"></i>
+                        Properties
+                    </button>
+                    <button class="nav-btn" onclick="showSection('tenants')">
+                        <i class="fas fa-users"></i>
+                        Tenants
+                    </button>
+                    <button class="nav-btn" onclick="showSection('maintenance')">
+                        <i class="fas fa-tools"></i>
+                        Maintenance
+                    </button>
+                    <button class="nav-btn" onclick="showSection('financial')">
+                        <i class="fas fa-dollar-sign"></i>
+                        Financial
+                    </button>
+                </nav>
+                <div class="user-menu">
+                    <span id="currentUser"></span>
+                    <button onclick="showModal('profileModal')" class="btn-profile">
+                        <i class="fas fa-user-cog"></i>
+                        Profile
+                    </button>
+                    <button onclick="logout()" class="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <div class="section-header" style="position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h2>Dashboard</h2>
+                            <p style="color: white;">Overview of your property management</p>
+                        </div>
+                        <div style="text-align: right; color: white; min-width: 500px; position: absolute; top: 20px; right: 20px;">
+                            <div style="display: flex; justify-content: flex-end; gap: 30px; font-size: 14px;">
+                                <div>
+                                    <strong>Total Rent Amount:</strong><br>
+                                    <span id="headerTotalRentAmount" style="font-size: 18px; font-weight: bold; color: #2196F3; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">$0</span>
+                                </div>
+                                <div>
+                                    <strong>Total Received Rent:</strong><br>
+                                    <span id="headerPaidRentAmount" style="font-size: 18px; font-weight: bold; color: #4CAF50; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">$0</span>
+                                </div>
+                                <div>
+                                    <strong>Pending Rent Amount:</strong><br>
+                                    <span id="headerPendingRentAmount" style="font-size: 18px; font-weight: bold; color: #F44336; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">$0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card clickable-stat" onclick="showStatDetails('totalProperties')">
+                        <div class="stat-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalProperties">0</h3>
+                            <p>Total Properties</p>
+                        </div>
+                    </div>
+                    <div class="stat-card clickable-stat" onclick="showStatDetails('occupiedProperties')">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="occupiedProperties">0</h3>
+                            <p>Occupied Properties</p>
+                        </div>
+                    </div>
+                    <div class="stat-card clickable-stat" onclick="showStatDetails('vacantProperties')">
+                        <div class="stat-icon">
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="vacantProperties">0</h3>
+                            <p>Vacant Properties</p>
+                        </div>
+                    </div>
+                    <div class="stat-card clickable-stat" onclick="showStatDetails('activeTenants')">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="activeTenants">0</h3>
+                            <p>Active Tenants</p>
+                        </div>
+                    </div>
+                    <div class="stat-card clickable-stat" onclick="showStatDetails('pendingMaintenance')">
+                        <div class="stat-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="pendingMaintenance">0</h3>
+                            <p>Pending Maintenance</p>
+                        </div>
+                    </div>
+                    <div class="stat-card clickable-stat" onclick="showStatDetails('pendingRent')">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="pendingRentCount">0</h3>
+                            <p>Pending Rent</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card clickable-card" onclick="openRentPropertiesPopup()">
+                        <h3><i class="fas fa-money-bill-wave"></i> Rent Properties Overview</h3>
+                        <div class="rent-summary">
+                            <div class="rent-count pending">
+                                <i class="fas fa-clock"></i>
+                                <div class="count-info">
+                                    <span class="count-number" id="dashboardPendingRentCount">0</span>
+                                    <span class="count-label">Pending</span>
+                                </div>
+                            </div>
+                            <div class="rent-count paid">
+                                <i class="fas fa-check-circle"></i>
+                                <div class="count-info">
+                                    <span class="count-number" id="dashboardPaidRentCount">0</span>
+                                    <span class="count-label">Paid</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <span class="click-hint">Click to view detailed rent information</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Vacant Properties</h3>
+                        <div id="vacantPropertiesList" class="list-container"></div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Recent Maintenance Requests</h3>
+                        <div id="recentMaintenance" class="list-container"></div>
+                    </div>
+                </div>
+                <!-- Export to Excel Button -->
+                <button id="dashboardExportExcelBtn" class="btn-excel-export" onclick="exportDashboardExcel()" title="Export Dashboard Data to Excel">
+                    <i class="fas fa-file-excel"></i>
+                </button>
+            </section>
+
+            <!-- Properties Section -->
+            <section id="properties" class="section">
+                <div class="section-header">
+                    <h2>Properties</h2>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <div class="view-toggle">
+                            <button id="propertyCardViewBtn" class="view-btn active" onclick="togglePropertyView('card')">
+                                <i class="fas fa-th-large"></i>
+                                Card View
+                            </button>
+                            <button id="propertyListViewBtn" class="view-btn" onclick="togglePropertyView('list')">
+                                <i class="fas fa-list"></i>
+                                List View
+                            </button>
+                        </div>
+                        <button onclick="showModal('propertyModal')" class="btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Add Property
+                        </button>
+                        <button onclick="showQuickEditPanel()" class="btn-secondary">
+                            <i class="fas fa-edit"></i>
+                            Quick Edit
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filters">
+                    <input type="text" id="propertySearch" placeholder="Search properties by name, address, type, status, rent..." class="search-input">
+                    <select id="propertyStatusFilter" class="filter-select" onchange="filterProperties()">
+                        <option value="">All Status</option>
+                        <option value="vacant">Vacant</option>
+                        <option value="occupied">Occupied</option>
+                        <option value="maintenance">Under Maintenance</option>
+                    </select>
+                </div>
+                
+                <div id="propertiesList" class="cards-grid"></div>
+                <div id="propertiesTable" class="table-container" style="display: none;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Address</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Bedrooms</th>
+                                <th>Bathrooms</th>
+                                <th>Square Feet</th>
+                                <th>Rent Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="propertiesTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Tenants Section -->
+            <section id="tenants" class="section">
+                <div class="section-header">
+                    <h2>Tenants</h2>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <div class="view-toggle">
+                            <button id="cardViewBtn" class="view-btn active" onclick="toggleTenantView('card')">
+                                <i class="fas fa-th-large"></i>
+                                Card View
+                            </button>
+                            <button id="listViewBtn" class="view-btn" onclick="toggleTenantView('list')">
+                                <i class="fas fa-list"></i>
+                                List View
+                            </button>
+                        </div>
+                        <button onclick="showModal('tenantModal')" class="btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Add Tenant
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filters">
+                    <input type="text" id="tenantSearch" placeholder="Search tenants by name, email, nationality, status, rent..." class="search-input">
+                    <select id="tenantStatusFilter" class="filter-select" onchange="filterTenants()">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="expired">Expired</option>
+                        <option value="cancelled">Contract Cancelled</option>
+                        <option value="breached">Contract Breached</option>
+                        <option value="terminated">Early Termination</option>
+                    </select>
+                </div>
+                
+                <div id="tenantsList" class="cards-grid"></div>
+                <div id="tenantsTable" class="table-container" style="display: none;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Nationality</th>
+                                <th>Property</th>
+                                <th>Rent Amount</th>
+                                <th>Lease Period</th>
+                                <th>Cheques</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tenantsTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Maintenance Section -->
+            <section id="maintenance" class="section">
+                <div class="section-header">
+                    <h2>Maintenance Requests</h2>
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="testMaintenanceCreation()" class="btn-secondary">
+                            <i class="fas fa-vial"></i>
+                            Test Request
+                        </button>
+                        <button onclick="testDeleteMaintenance()" class="btn-secondary">
+                            <i class="fas fa-trash"></i>
+                            Test Delete
+                        </button>
+                        <button onclick="showModal('maintenanceModal')" class="btn-primary">
+                            <i class="fas fa-plus"></i>
+                            New Request
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filters">
+                    <input type="text" id="maintenanceSearch" placeholder="Search requests..." class="search-input">
+                    <select id="maintenanceStatusFilter" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                    <select id="maintenancePriorityFilter" class="filter-select">
+                        <option value="">All Priorities</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                
+                <div id="maintenanceList" class="cards-grid"></div>
+            </section>
+
+            <!-- Financial Section -->
+            <section id="financial" class="section">
+                <div class="section-header">
+                    <h2>Financial Records</h2>
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="showModal('rentTrackingModal')" class="btn-primary">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Rent Tracking
+                        </button>
+                        <button onclick="showModal('financialModal')" class="btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Add Record
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filters">
+                    <input type="text" id="financialSearch" placeholder="Search records..." class="search-input">
+                    <select id="financialTypeFilter" class="filter-select">
+                        <option value="">All Types</option>
+                        <option value="rent">Rent</option>
+                        <option value="expense">Expense</option>
+                        <option value="deposit">Deposit</option>
+                        <option value="fee">Fee</option>
+                    </select>
+                </div>
+                
+                <div id="financialList" class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Property</th>
+                                <th>Tenant</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="financialTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Property Modal -->
+    <div id="propertyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="propertyModalTitle">Add New Property</h2>
+                <button onclick="closeModal('propertyModal')" class="close-btn">&times;</button>
+            </div>
+            <form id="propertyForm" class="modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="propertyName">Property Name</label>
+                        <input type="text" id="propertyName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="propertyAddress">Address</label>
+                        <input type="text" id="propertyAddress" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="propertyType">Type</label>
+                        <select id="propertyType" required onchange="toggleCustomPropertyType()">
+                            <option value="">Select Type</option>
+                            <option value="villa">Villa</option>
+                            <option value="1bhk">1 BHK</option>
+                            <option value="2bhk">2 BHK</option>
+                            <option value="3bhk">3 BHK</option>
+                            <option value="4bhk">4 BHK</option>
+                            <option value="studio">Studio</option>
+                            <option value="apartment">Apartment</option>
+                            <option value="house">House</option>
+                            <option value="condo">Condo</option>
+                            <option value="townhouse">Townhouse</option>
+                            <option value="shop">Shop</option>
+                            <option value="mall">Mall</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="propertyStatus">Status</label>
+                        <select id="propertyStatus" required>
+                            <option value="vacant">Vacant</option>
+                            <option value="occupied">Occupied</option>
+                            <option value="maintenance">Under Maintenance</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" id="customPropertyTypeRow" style="display: none;">
+                    <div class="form-group">
+                        <label for="customPropertyType">Custom Property Type</label>
+                        <input type="text" id="customPropertyType" placeholder="Enter custom property type">
+                    </div>
+                    <div class="form-group">
+                        <!-- Empty div to maintain grid layout -->
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="propertyBedrooms">Bedrooms</label>
+                        <input type="number" id="propertyBedrooms" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="propertyBathrooms">Bathrooms</label>
+                        <input type="number" id="propertyBathrooms" min="0" step="0.5">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="propertyElectricityNumber">Electricity Number</label>
+                        <input type="text" id="propertyElectricityNumber" placeholder="Enter electricity meter number">
+                    </div>
+                    <div class="form-group">
+                        <label for="propertyWaterNumber">Water Number</label>
+                        <input type="text" id="propertyWaterNumber" placeholder="Enter water meter number">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="propertySquareFeet">Square Feet</label>
+                        <input type="number" id="propertySquareFeet" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="propertyRent">Rent Amount</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="number" id="propertyRent" min="0" step="0.01" style="flex: 1;">
+                            <select id="propertyCurrency" style="width: 100px;">
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="INR">INR</option>
+                                <option value="CAD">CAD</option>
+                                <option value="AUD">AUD</option>
+                                <option value="JPY">JPY</option>
+                                <option value="CHF">CHF</option>
+                                <option value="SGD">SGD</option>
+                                <option value="AED">AED</option>
+                                <option value="SAR">SAR</option>
+                                <option value="QAR">QAR</option>
+                                <option value="KWD">KWD</option>
+                                <option value="BHD">BHD</option>
+                                <option value="OMR">OMR</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal('propertyModal')" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Property</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tenant Modal -->
+    <div id="tenantModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="tenantModalTitle">Add New Tenant</h2>
+                <button onclick="closeModal('tenantModal')" class="close-btn">&times;</button>
+            </div>
+            <form id="tenantForm" class="modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tenantFirstName">First Name</label>
+                        <input type="text" id="tenantFirstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tenantLastName">Last Name</label>
+                        <input type="text" id="tenantLastName" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tenantEmail">Email</label>
+                        <input type="email" id="tenantEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tenantPhone">Phone</label>
+                        <input type="tel" id="tenantPhone">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tenantNationality">Nationality</label>
+                        <input type="text" id="tenantNationality" placeholder="Enter nationality">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tenantProperty">Property</label>
+                        <select id="tenantProperty" required>
+                            <option value="">Select Property</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tenantRent">Rent Amount</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="number" id="tenantRent" min="0" step="0.01" required style="flex: 1;">
+                            <select id="tenantCurrency" style="width: 100px;">
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="INR">INR</option>
+                                <option value="CAD">CAD</option>
+                                <option value="AUD">AUD</option>
+                                <option value="JPY">JPY</option>
+                                <option value="CHF">CHF</option>
+                                <option value="SGD">SGD</option>
+                                <option value="AED">AED</option>
+                                <option value="SAR">SAR</option>
+                                <option value="QAR">QAR</option>
+                                <option value="KWD">KWD</option>
+                                <option value="BHD">BHD</option>
+                                <option value="OMR">OMR</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tenantLeaseStart">Lease Start</label>
+                        <input type="date" id="tenantLeaseStart" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tenantLeaseEnd">Lease End</label>
+                        <input type="date" id="tenantLeaseEnd" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tenantFreeMonth">Free Month</label>
+                        <select id="tenantFreeMonth">
+                            <option value="">No Free Month</option>
+                            <option value="first">First Month</option>
+                            <option value="last">Last Month</option>
+                            <option value="custom">Custom Month</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="freeMonthDetails" style="display: none;">
+                        <label for="tenantFreeMonthDate">Free Month Date</label>
+                        <input type="month" id="tenantFreeMonthDate" placeholder="Select month and year">
+                    </div>
+                </div>
+                
+                <!-- Cheque Management Section -->
+                <div class="cheque-management-section">
+                    <h3><i class="fas fa-money-check-alt"></i> Cheque Management</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tenantChequeCount">Number of Cheques</label>
+                            <select id="tenantChequeCount" onchange="updateChequeFields()">
+                                <option value="0">No Cheques</option>
+                                <option value="1">1 Cheque</option>
+                                <option value="3">3 Cheques</option>
+                                <option value="6">6 Cheques</option>
+                                <option value="12">12 Cheques (Annual)</option>
+                                <option value="13">13 Cheques (12 + Security)</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="customChequeCountGroup" style="display: none;">
+                            <label for="customChequeCount">Custom Cheque Count</label>
+                            <input type="number" id="customChequeCount" min="1" max="24" placeholder="Enter number of cheques" onchange="updateChequeFields()">
+                        </div>
+                    </div>
+                    
+                    <div id="chequeDetailsContainer" style="display: none;">
+                        <div class="cheque-summary">
+                            <div class="cheque-summary-item">
+                                <span class="summary-label">Total Cheques:</span>
+                                <span id="totalChequeCount" class="summary-value">0</span>
+                            </div>
+                            <div class="cheque-summary-item">
+                                <span class="summary-label">Dated Cheques:</span>
+                                <span id="datedChequeCount" class="summary-value">0</span>
+                            </div>
+                            <div class="cheque-summary-item">
+                                <span class="summary-label">Security Cheques:</span>
+                                <span id="securityChequeCount" class="summary-value">0</span>
+                            </div>
+                        </div>
+                        
+                        <div id="chequeFieldsContainer" class="cheque-fields-container">
+                            <!-- Cheque fields will be dynamically generated here -->
+                        </div>
+                        
+                        <div class="cheque-actions">
+                            <button type="button" onclick="generateChequeDates()" class="btn-secondary">
+                                <i class="fas fa-calendar-plus"></i>
+                                Auto-Generate Dates
+                            </button>
+                            <button type="button" onclick="clearAllCheques()" class="btn-secondary">
+                                <i class="fas fa-trash"></i>
+                                Clear All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal('tenantModal')" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Tenant</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Maintenance Modal -->
+    <div id="maintenanceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="maintenanceModalTitle">New Maintenance Request</h2>
+                <button onclick="closeModal('maintenanceModal')" class="close-btn">&times;</button>
+            </div>
+            <form id="maintenanceForm" class="modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="maintenanceProperty">Property (Optional)</label>
+                        <select id="maintenanceProperty">
+                            <option value="">Select Property</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="maintenanceTenant">Tenant (Optional)</label>
+                        <select id="maintenanceTenant">
+                            <option value="">Select Tenant</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="maintenanceTitle">Title</label>
+                    <input type="text" id="maintenanceTitle" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="maintenancePriority">Priority</label>
+                        <select id="maintenancePriority" required>
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="maintenanceDescription">Description</label>
+                        <textarea id="maintenanceDescription" rows="2" placeholder="Brief description of the issue..."></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal('maintenanceModal')" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Create Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Financial Modal -->
+    <div id="financialModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="financialModalTitle">Add Financial Record</h2>
+                <button onclick="closeModal('financialModal')" class="close-btn">&times;</button>
+            </div>
+            <form id="financialForm" class="modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="financialProperty">Property</label>
+                        <select id="financialProperty" required>
+                            <option value="">Select Property</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="financialTenant">Tenant (Optional)</label>
+                        <select id="financialTenant">
+                            <option value="">Select Tenant</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="financialType">Type</label>
+                        <select id="financialType" required>
+                            <option value="">Select Type</option>
+                            <option value="rent">Rent</option>
+                            <option value="expense">Expense</option>
+                            <option value="deposit">Deposit</option>
+                            <option value="fee">Fee</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="financialAmount">Amount</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="number" id="financialAmount" min="0" step="0.01" required style="flex: 1;">
+                            <select id="financialCurrency" style="width: 100px;">
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="INR">INR</option>
+                                <option value="CAD">CAD</option>
+                                <option value="AUD">AUD</option>
+                                <option value="JPY">JPY</option>
+                                <option value="CHF">CHF</option>
+                                <option value="SGD">SGD</option>
+                                <option value="AED">AED</option>
+                                <option value="SAR">SAR</option>
+                                <option value="QAR">QAR</option>
+                                <option value="KWD">KWD</option>
+                                <option value="BHD">BHD</option>
+                                <option value="OMR">OMR</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="financialDate">Date</label>
+                        <input type="date" id="financialDate" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="financialDescription">Description</label>
+                    <input type="text" id="financialDescription">
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal('financialModal')" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rent Tracking Modal -->
+    <div id="rentTrackingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="rentTrackingModalTitle">Rent Payment Tracking</h2>
+                <button onclick="closeModal('rentTrackingModal')" class="close-btn">&times;</button>
+            </div>
+            <form id="rentTrackingForm" class="modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rentTrackingProperty">Property</label>
+                        <select id="rentTrackingProperty" required>
+                            <option value="">Select Property</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="rentTrackingTenant">Tenant</label>
+                        <select id="rentTrackingTenant" required>
+                            <option value="">Select Tenant</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rentTrackingMonth">Rent Month</label>
+                        <input type="month" id="rentTrackingMonth" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rentTrackingDueDate">Due Date</label>
+                        <input type="date" id="rentTrackingDueDate" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rentTrackingTotalAmount">Total Rent Amount</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="number" id="rentTrackingTotalAmount" min="0" step="0.01" required style="flex: 1;">
+                            <select id="rentTrackingCurrency" style="width: 100px;">
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="INR">INR</option>
+                                <option value="CAD">CAD</option>
+                                <option value="AUD">AUD</option>
+                                <option value="JPY">JPY</option>
+                                <option value="CHF">CHF</option>
+                                <option value="SGD">SGD</option>
+                                <option value="AED">AED</option>
+                                <option value="SAR">SAR</option>
+                                <option value="QAR">QAR</option>
+                                <option value="KWD">KWD</option>
+                                <option value="BHD">BHD</option>
+                                <option value="OMR">OMR</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="payment-section">
+                    <h3>Payment Details</h3>
+                    
+                    <div class="payment-methods">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="rentTrackingPaymentMethod">Payment Method</label>
+                                <select id="rentTrackingPaymentMethod" required onchange="togglePaymentFields()">
+                                    <option value="">Select Payment Method</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="cheque">Cheque</option>
+                                    <option value="online">Online Transfer</option>
+                                    <option value="partial">Partial Payment</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="rentTrackingPaymentAmount">Payment Amount</label>
+                                <input type="number" id="rentTrackingPaymentAmount" min="0" step="0.01" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Cash Payment Fields -->
+                        <div id="cashFields" class="payment-fields" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="rentTrackingCashReceivedBy">Received By</label>
+                                    <input type="text" id="rentTrackingCashReceivedBy" placeholder="Name of person who received">
+                                </div>
+                                <div class="form-group">
+                                    <label for="rentTrackingCashReceiptNumber">Receipt Number</label>
+                                    <input type="text" id="rentTrackingCashReceiptNumber" placeholder="Receipt #">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cheque Payment Fields -->
+                        <div id="chequeFields" class="payment-fields" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="rentTrackingChequeNumber">Cheque Number</label>
+                                    <input type="text" id="rentTrackingChequeNumber" placeholder="Cheque #">
+                                </div>
+                                <div class="form-group">
+                                    <label for="rentTrackingChequeBank">Bank Name</label>
+                                    <input type="text" id="rentTrackingChequeBank" placeholder="Bank name">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="rentTrackingChequeDate">Cheque Date</label>
+                                    <input type="date" id="rentTrackingChequeDate">
+                                </div>
+                                <div class="form-group">
+                                    <label for="rentTrackingChequeStatus">Status</label>
+                                    <select id="rentTrackingChequeStatus">
+                                        <option value="pending">Pending</option>
+                                        <option value="cleared">Cleared</option>
+                                        <option value="bounced">Bounced</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Online Transfer Fields -->
+                        <div id="onlineFields" class="payment-fields" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="rentTrackingOnlineReference">Transaction Reference</label>
+                                    <input type="text" id="rentTrackingOnlineReference" placeholder="TXN ID/Reference">
+                                </div>
+                                <div class="form-group">
+                                    <label for="rentTrackingOnlineBank">Bank/Platform</label>
+                                    <input type="text" id="rentTrackingOnlineBank" placeholder="Bank/UPI/PayPal etc.">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Partial Payment Fields -->
+                        <div id="partialFields" class="payment-fields" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="rentTrackingPartialReason">Reason for Partial Payment</label>
+                                    <select id="rentTrackingPartialReason">
+                                        <option value="">Select Reason</option>
+                                        <option value="financial_hardship">Financial Hardship</option>
+                                        <option value="late_payment">Late Payment</option>
+                                        <option value="agreement">Mutual Agreement</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="rentTrackingPartialBalance">Remaining Balance</label>
+                                    <input type="number" id="rentTrackingPartialBalance" min="0" step="0.01" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="rentTrackingPartialNotes">Notes</label>
+                                <textarea id="rentTrackingPartialNotes" rows="2" placeholder="Additional notes about partial payment..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="rentTrackingNotes">Additional Notes</label>
+                    <textarea id="rentTrackingNotes" rows="2" placeholder="Any additional notes..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal('rentTrackingModal')" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Property Details Modal -->
+    <div id="propertyDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="propertyDetailsTitle">Property Details</h2>
+                <button onclick="closeModal('propertyDetailsModal')" class="close-btn">&times;</button>
+            </div>
+            <div id="propertyDetailsContent" class="property-details-content">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Loading property details...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Profile Settings</h2>
+                <button onclick="closeModal('profileModal')" class="close-btn">&times;</button>
+            </div>
+            
+            <!-- Profile Tabs -->
+            <div class="profile-tabs">
+                <button class="profile-tab active" onclick="showProfileTab('settings')">
+                    <i class="fas fa-user-cog"></i> Profile Settings
+                </button>
+                <button class="profile-tab" onclick="showProfileTab('bulkUpload')">
+                    <i class="fas fa-upload"></i> Bulk Upload
+                </button>
+                <button class="profile-tab" onclick="showProfileTab('dataSharing')">
+                    <i class="fas fa-share-alt"></i> Data Sharing
+                </button>
+            </div>
+            
+            <!-- Profile Settings Tab -->
+            <div id="profileSettingsTab" class="profile-tab-content active">
+                <form id="profileForm" class="modal-form">
+                    <div class="form-group">
+                        <label for="profileUsername">Username</label>
+                        <input type="text" id="profileUsername" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileEmail">Email</label>
+                        <input type="email" id="profileEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="profilePhone">Phone Number</label>
+                        <input type="tel" id="profilePhone" placeholder="+1 (555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileAddress">Address</label>
+                        <textarea id="profileAddress" rows="2" placeholder="Enter your address"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileCurrentPassword">Current Password</label>
+                        <input type="password" id="profileCurrentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileNewPassword">New Password (leave blank to keep current)</label>
+                        <input type="password" id="profileNewPassword" minlength="8">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileConfirmPassword">Confirm New Password</label>
+                        <input type="password" id="profileConfirmPassword" minlength="8">
+                    </div>
+                    <div class="privacy-notice">
+                        <i class="fas fa-shield-alt"></i>
+                        <small>Your personal data is encrypted and protected. Only you can access your profile information.</small>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" onclick="closeModal('profileModal')" class="btn-secondary">Cancel</button>
+                        <button type="submit" class="btn-primary">Update Profile</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Bulk Upload Tab -->
+            <div id="bulkUploadTab" class="profile-tab-content">
+                <div class="bulk-upload-section">
+                    <h3><i class="fas fa-file-excel"></i> Excel Bulk Upload</h3>
+                    <p>Upload Excel files to bulk import properties and tenants into the database.</p>
+                    
+                    <!-- Properties Upload -->
+                    <div class="upload-card">
+                        <h4><i class="fas fa-home"></i> Properties Upload</h4>
+                        <p>Upload an Excel file with property information. The file should have columns: Name, Address, Type, Status, Bedrooms, Bathrooms, Electricity Number, Water Number, Square Feet, Rent Amount, Currency</p>
+                        
+                        <div class="upload-area" onclick="document.getElementById('propertiesFile').click()">
+                            <input type="file" id="propertiesFile" accept=".xlsx,.xls" style="display: none;" onchange="handlePropertiesFileUpload(event)">
+                            <div class="upload-content">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Click to select Excel file for Properties</p>
+                                <small>Supports .xlsx and .xls files</small>
+                            </div>
+                        </div>
+                        
+                        <div id="propertiesUploadStatus" class="upload-status" style="display: none;">
+                            <div class="upload-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill"></div>
+                                </div>
+                                <span class="progress-text">0%</span>
+                            </div>
+                            <div class="upload-message"></div>
+                        </div>
+                        
+                        <div class="upload-actions">
+                            <button onclick="downloadPropertiesTemplate()" class="btn-secondary">
+                                <i class="fas fa-download"></i> Download Template
+                            </button>
+                            <button onclick="document.getElementById('propertiesFile').click()" class="btn-primary">
+                                <i class="fas fa-upload"></i> Upload Properties
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Combined Upload -->
+                    <div class="upload-card" style="border: 2px solid #667eea; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <h4><i class="fas fa-layer-group"></i> Combined Properties & Tenants Upload</h4>
+                        <p style="color: rgba(255,255,255,0.9);">Upload a single Excel file with both property and tenant details in one sheet. Each row contains property information and optional tenant information. This is the recommended method for bulk importing related data.</p>
+                        
+                        <div class="upload-area" onclick="document.getElementById('combinedFile').click()" style="border: 2px dashed rgba(255,255,255,0.5); background: rgba(255,255,255,0.1);">
+                            <input type="file" id="combinedFile" accept=".xlsx,.xls" style="display: none;" onchange="handleCombinedFileUpload(event)">
+                            <div class="upload-content">
+                                <i class="fas fa-cloud-upload-alt" style="color: white;"></i>
+                                <p style="color: white;">Click to select Excel file with Properties & Tenants sheets</p>
+                                <small style="color: rgba(255,255,255,0.8);">Supports .xlsx and .xls files</small>
+                            </div>
+                        </div>
+                        
+                        <div id="combinedUploadStatus" class="upload-status" style="display: none;">
+                            <div class="upload-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill"></div>
+                                </div>
+                                <span class="progress-text">0%</span>
+                            </div>
+                            <div class="upload-message"></div>
+                        </div>
+                        
+                        <div class="upload-actions">
+                            <button onclick="downloadCombinedTemplate()" class="btn-secondary" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                                <i class="fas fa-download"></i> Download Template
+                            </button>
+                            <button onclick="document.getElementById('combinedFile').click()" class="btn-primary" style="background: rgba(255,255,255,0.9); color: #667eea;">
+                                <i class="fas fa-upload"></i> Upload Combined File
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Tenants Upload -->
+                    <div class="upload-card">
+                        <h4><i class="fas fa-users"></i> Tenants Upload</h4>
+                        <p>Upload an Excel file with tenant information. The file should have columns: First Name, Last Name, Email, Phone, Property Name, Rent Amount, Currency, Lease Start Date, Lease End Date</p>
+                        
+                        <!-- Available Properties List -->
+                        <div class="available-properties">
+                            <h5><i class="fas fa-info-circle"></i> Available Property Names</h5>
+                            <div id="availablePropertiesList" class="properties-list">
+                                <p>Loading available properties...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="upload-area" onclick="document.getElementById('tenantsFile').click()">
+                            <input type="file" id="tenantsFile" accept=".xlsx,.xls" style="display: none;" onchange="handleTenantsFileUpload(event)">
+                            <div class="upload-content">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Click to select Excel file for Tenants</p>
+                                <small>Supports .xlsx and .xls files</small>
+                            </div>
+                        </div>
+                        
+                        <div id="tenantsUploadStatus" class="upload-status" style="display: none;">
+                            <div class="upload-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill"></div>
+                                </div>
+                                <span class="progress-text">0%</span>
+                            </div>
+                            <div class="upload-message"></div>
+                        </div>
+                        
+                        <div class="upload-actions">
+                            <button onclick="downloadTenantsTemplate()" class="btn-secondary">
+                                <i class="fas fa-download"></i> Download Template
+                            </button>
+                            <button onclick="document.getElementById('tenantsFile').click()" class="btn-primary">
+                                <i class="fas fa-upload"></i> Upload Tenants
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="upload-info">
+                        <h4><i class="fas fa-info-circle"></i> Upload Guidelines</h4>
+                        <ul>
+                            <li><strong>Combined Upload (Recommended):</strong> Use a single Excel file with one sheet containing both property and tenant columns</li>
+                            <li>Each row represents one property with optional tenant information</li>
+                            <li>Property columns: Name, Address, Type, Status, Bedrooms, Bathrooms, Electricity Number, Water Number, Square Feet, Rent Amount, Currency</li>
+                            <li>Tenant columns: First Name, Last Name, Email, Phone, Rent Amount, Lease Start Date, Lease End Date</li>
+                            <li><strong>Note:</strong> Tenant rent currency automatically uses the same currency as the property</li>
+                            <li>Property Name, Address, and Type are required for each row</li>
+                            <li>Tenant data is optional - leave tenant fields empty if no tenant</li>
+                            <li>If tenant data is provided, First Name and Email are required</li>
+                            <li>Last Name is optional - can be left empty</li>
+                            <li>Dates should be in YYYY-MM-DD format</li>
+                            <li>Currency should be a 3-letter code (USD, EUR, etc.)</li>
+                            <li>Property Status options: vacant, occupied, maintenance</li>
+                            <li>Property Type options: villa, 1bhk, 2bhk, 3bhk, 4bhk, studio, apartment, house, condo, townhouse, other</li>
+                            <li>Maximum file size: 5MB</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Data Sharing Tab -->
+            <div id="dataSharingTab" class="profile-tab-content">
+                <div class="data-sharing-section">
+                    <h3><i class="fas fa-share-alt"></i> Data Sharing & Export</h3>
+                    <p>Export all your property management data to share with other accounts or for backup purposes.</p>
+                    
+                    <!-- Export All Data -->
+                    <div class="upload-card" style="border: 2px solid #28a745; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                        <h4><i class="fas fa-download"></i> Export All Data</h4>
+                        <p style="color: rgba(255,255,255,0.9);">Export all your properties, tenants, maintenance requests, and financial records in a single Excel file. This includes all data from your account.</p>
+                        
+                        <div class="upload-actions">
+                            <button onclick="exportAllData()" class="btn-primary" style="background: rgba(255,255,255,0.9); color: #28a745; font-weight: bold;">
+                                <i class="fas fa-download"></i> Export Complete Data
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Export by Category -->
+                    <div class="upload-card">
+                        <h4><i class="fas fa-filter"></i> Export by Category</h4>
+                        <p>Export specific data categories individually for targeted sharing.</p>
+                        
+                        <div class="export-options">
+                            <button onclick="exportDataByCategory('properties')" class="btn-secondary">
+                                <i class="fas fa-home"></i> Export Properties Only
+                            </button>
+                            <button onclick="exportDataByCategory('tenants')" class="btn-secondary">
+                                <i class="fas fa-users"></i> Export Tenants Only
+                            </button>
+                            <button onclick="exportDataByCategory('maintenance')" class="btn-secondary">
+                                <i class="fas fa-tools"></i> Export Maintenance Only
+                            </button>
+                            <button onclick="exportDataByCategory('financial')" class="btn-secondary">
+                                <i class="fas fa-dollar-sign"></i> Export Financial Only
+                            </button>
+                            <button onclick="exportDataByCategory('rent-tracking')" class="btn-secondary">
+                                <i class="fas fa-calendar-check"></i> Export Rent Tracking Only
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Share with Specific Account -->
+                    <div class="upload-card" style="border: 2px solid #007bff; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;">
+                        <h4><i class="fas fa-user-plus"></i> Share with Another Account</h4>
+                        <p style="color: rgba(255,255,255,0.9);">Generate a shareable link or code that another account can use to import your data.</p>
+                        
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="shareAccountEmail" style="color: white;">Recipient Email (Optional)</label>
+                            <input type="email" id="shareAccountEmail" placeholder="Enter recipient email address" style="width: 100%; padding: 10px; border-radius: 5px; border: none;">
+                        </div>
+                        
+                        <div class="upload-actions">
+                            <button onclick="generateShareLink()" class="btn-primary" style="background: rgba(255,255,255,0.9); color: #007bff; font-weight: bold;">
+                                <i class="fas fa-link"></i> Generate Share Link
+                            </button>
+                            <button onclick="generateShareCode()" class="btn-secondary" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                                <i class="fas fa-key"></i> Generate Share Code
+                            </button>
+                        </div>
+                        
+                        <div id="shareResult" style="margin-top: 15px; display: none;">
+                            <div class="share-link-container" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 5px; margin-bottom: 10px;">
+                                <label style="color: white; font-weight: bold;">Share Link:</label>
+                                <div style="display: flex; gap: 10px; margin-top: 5px;">
+                                    <input type="text" id="shareLinkText" readonly style="flex: 1; padding: 8px; border-radius: 3px; border: none; background: white; color: #333;">
+                                    <button onclick="copyShareLink()" class="btn-small" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 3px; cursor: pointer;">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="share-code-container" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 5px;">
+                                <label style="color: white; font-weight: bold;">Share Code:</label>
+                                <div style="display: flex; gap: 10px; margin-top: 5px;">
+                                    <input type="text" id="shareCodeText" readonly style="flex: 1; padding: 8px; border-radius: 3px; border: none; background: white; color: #333;">
+                                    <button onclick="copyShareCode()" class="btn-small" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 3px; cursor: pointer;">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Import Shared Data -->
+                    <div class="upload-card">
+                        <h4><i class="fas fa-upload"></i> Import Shared Data</h4>
+                        <p>Import data that has been shared with you from another account.</p>
+                        
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="importShareLink">Share Link or Code</label>
+                            <input type="text" id="importShareLink" placeholder="Paste share link or code here" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                        </div>
+                        
+                        <div class="upload-actions">
+                            <button onclick="importSharedData()" class="btn-primary">
+                                <i class="fas fa-download"></i> Import Shared Data
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Import Exported Excel File -->
+                    <div class="upload-card" style="border: 2px solid #ffc107; background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%); color: white;">
+                        <h4><i class="fas fa-file-excel"></i> Import Exported Excel File</h4>
+                        <p style="color: rgba(255,255,255,0.9);">Import a previously exported Excel file back into the system. This is perfect for restoring data or transferring between accounts.</p>
+                        
+                        <div class="upload-area" onclick="document.getElementById('importExcelFile').click()" style="border: 2px dashed rgba(255,255,255,0.5); background: rgba(255,255,255,0.1);">
+                            <input type="file" id="importExcelFile" accept=".xlsx,.xls" style="display: none;" onchange="handleExportedExcelImport(event)">
+                            <div class="upload-content">
+                                <i class="fas fa-cloud-upload-alt" style="color: white;"></i>
+                                <p style="color: white;">Click to select exported Excel file</p>
+                                <small style="color: rgba(255,255,255,0.8);">Supports .xlsx and .xls files exported from this system</small>
+                            </div>
+                        </div>
+                        
+                        <div id="importExcelStatus" class="upload-status" style="display: none;">
+                            <div class="upload-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill"></div>
+                                </div>
+                                <span class="progress-text">0%</span>
+                            </div>
+                            <div class="upload-message"></div>
+                        </div>
+                        
+                        <div class="upload-actions">
+                            <button onclick="document.getElementById('importExcelFile').click()" class="btn-primary" style="background: rgba(255,255,255,0.9); color: #ffc107; font-weight: bold;">
+                                <i class="fas fa-upload"></i> Import Exported File
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="upload-info">
+                        <h4><i class="fas fa-info-circle"></i> Data Sharing Guidelines</h4>
+                        <ul>
+                            <li><strong>Complete Export:</strong> Downloads all your data in a single Excel file with multiple sheets</li>
+                            <li><strong>Category Export:</strong> Export specific data types for targeted sharing</li>
+                            <li><strong>Share Links:</strong> Generate secure links that expire after 7 days</li>
+                            <li><strong>Share Codes:</strong> Generate codes that can be shared via text/email</li>
+                            <li><strong>Data Privacy:</strong> Only share data with trusted accounts</li>
+                            <li><strong>Import Safety:</strong> Imported data will be added to your existing data</li>
+                            <li><strong>Backup:</strong> Regular exports are recommended for data backup</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contract Management Modal -->
+    <div id="contractManagementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="contractManagementTitle">Contract Management</h2>
+                <button onclick="closeModal('contractManagementModal')" class="close-btn">&times;</button>
+            </div>
+            <form id="contractManagementForm" class="modal-form">
+                <div class="tenant-info-summary">
+                    <h3><i class="fas fa-user"></i> Tenant Information</h3>
+                    <div class="tenant-summary">
+                        <div class="summary-row">
+                            <strong>Name:</strong> <span id="contractTenantName">-</span>
+                        </div>
+                        <div class="summary-row">
+                            <strong>Property:</strong> <span id="contractPropertyName">-</span>
+                        </div>
+                        <div class="summary-row">
+                            <strong>Current Status:</strong> <span id="contractCurrentStatus">-</span>
+                        </div>
+                        <div class="summary-row">
+                            <strong>Lease End:</strong> <span id="contractLeaseEnd">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contractAction">Contract Action</label>
+                    <select id="contractAction" required onchange="toggleContractActionFields()">
+                        <option value="">Select Action</option>
+                        <option value="cancelled">Contract Cancellation (Mutual Agreement)</option>
+                        <option value="breached">Contract Breach (Tenant Violation)</option>
+                        <option value="terminated">Early Termination (Landlord Decision)</option>
+                        <option value="renewed">Contract Renewal</option>
+                        <option value="extended">Contract Extension</option>
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contractEffectiveDate">Effective Date</label>
+                        <input type="date" id="contractEffectiveDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contractNoticePeriod">Notice Period (Days)</label>
+                        <input type="number" id="contractNoticePeriod" min="0" value="30">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contractReason">Reason/Details</label>
+                    <textarea id="contractReason" rows="3" placeholder="Provide details about the contract action..."></textarea>
+                </div>
+                
+                <!-- Financial Settlement Section -->
+                <div class="financial-settlement-section">
+                    <h3><i class="fas fa-money-bill-wave"></i> Financial Settlement</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contractRentOwed">Rent Owed</label>
+                            <input type="number" id="contractRentOwed" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="contractDepositReturn">Deposit Return Amount</label>
+                            <input type="number" id="contractDepositReturn" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contractPenaltyAmount">Penalty/Fee Amount</label>
+                            <input type="number" id="contractPenaltyAmount" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="contractFinalAmount">Final Settlement Amount</label>
+                            <input type="number" id="contractFinalAmount" min="0" step="0.01" placeholder="0.00" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cheque Management Section -->
+                <div class="cheque-settlement-section">
+                    <h3><i class="fas fa-money-check-alt"></i> Cheque Settlement</h3>
+                    <div id="contractChequeList" class="cheque-list">
+                        <!-- Cheques will be loaded here -->
+                    </div>
+                    <div class="form-group">
+                        <label for="contractChequeAction">Cheque Action</label>
+                        <select id="contractChequeAction">
+                            <option value="return">Return to Tenant</option>
+                            <option value="destroy">Destroy/Cancel</option>
+                            <option value="partial">Partial Return</option>
+                            <option value="hold">Hold for Settlement</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal('contractManagementModal')" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Update Contract Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Edit Panel Modal -->
+    <div id="quickEditModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>Quick Edit Panel</h2>
+                <button onclick="closeModal('quickEditModal')" class="close-btn">&times;</button>
+            </div>
+            <div class="quick-edit-container">
+                <div class="quick-edit-sidebar">
+                    <h3>Select Property</h3>
+                    <div class="property-selector">
+                        <select id="quickEditPropertySelect" onchange="loadPropertyForQuickEdit()">
+                            <option value="">Choose a property...</option>
+                        </select>
+                    </div>
+                    <div id="quickEditPropertyList" class="property-list">
+                        <!-- Properties will be loaded here -->
+                    </div>
+                </div>
+                <div class="quick-edit-main">
+                    <div id="quickEditContent" class="quick-edit-content">
+                        <div class="quick-edit-placeholder">
+                            <i class="fas fa-home"></i>
+                            <h3>Select a Property</h3>
+                            <p>Choose a property from the list to edit or delete</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 

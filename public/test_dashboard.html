@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard Debug Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Dashboard Loading</h2>
+        <button class="test-button" onclick="testDashboardLoad()">Test Dashboard Load</button>
+        <button class="test-button" onclick="testVacantProperties()">Test Vacant Properties</button>
+        <button class="test-button" onclick="testMaintenance()">Test Maintenance</button>
+        <button class="test-button" onclick="testAPI()">Test API Connection</button>
+        <div id="testResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Create Sample Data</h2>
+        <button class="test-button" onclick="createSampleData()">Create Sample Data</button>
+        <div id="sampleDataResults"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+
+        function logResult(message, type = 'info') {
+            const results = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            results.appendChild(div);
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function testAPI() {
+            try {
+                logResult('Testing API connection...', 'info');
+                const result = await apiCall('/api/dashboard');
+                logResult(`API connected successfully! Dashboard data: ${JSON.stringify(result)}`, 'success');
+            } catch (error) {
+                logResult(`API connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDashboardLoad() {
+            try {
+                logResult('Testing dashboard load...', 'info');
+                const stats = await apiCall('/api/dashboard');
+                
+                logResult(`Total Properties: ${stats.totalProperties || 0}`, 'info');
+                logResult(`Vacant Properties: ${stats.vacantProperties || 0}`, 'info');
+                logResult(`Pending Rent: ${stats.pendingRentProperties ? stats.pendingRentProperties.length : 0}`, 'info');
+                logResult(`Paid Rent: ${stats.rentPaidProperties ? stats.rentPaidProperties.length : 0}`, 'info');
+                
+                if (stats.vacantPropertiesList) {
+                    logResult(`Vacant Properties List: ${stats.vacantPropertiesList.length} items`, 'info');
+                    stats.vacantPropertiesList.forEach((prop, index) => {
+                        logResult(`  ${index + 1}. ${prop.name} - ${prop.address}`, 'info');
+                    });
+                }
+                
+                logResult('Dashboard load test completed!', 'success');
+            } catch (error) {
+                logResult(`Dashboard load failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testVacantProperties() {
+            try {
+                logResult('Testing vacant properties...', 'info');
+                const properties = await apiCall('/api/properties');
+                const vacantProperties = properties.filter(p => p.status === 'vacant');
+                
+                logResult(`Total Properties: ${properties.length}`, 'info');
+                logResult(`Vacant Properties: ${vacantProperties.length}`, 'info');
+                
+                vacantProperties.forEach((prop, index) => {
+                    logResult(`  ${index + 1}. ${prop.name} - ${prop.address} - ${prop.type}`, 'info');
+                });
+                
+                logResult('Vacant properties test completed!', 'success');
+            } catch (error) {
+                logResult(`Vacant properties test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testMaintenance() {
+            try {
+                logResult('Testing maintenance requests...', 'info');
+                const maintenance = await apiCall('/api/maintenance');
+                
+                logResult(`Total Maintenance Requests: ${maintenance.length}`, 'info');
+                
+                maintenance.forEach((req, index) => {
+                    logResult(`  ${index + 1}. ${req.title} - ${req.status}`, 'info');
+                });
+                
+                logResult('Maintenance test completed!', 'success');
+            } catch (error) {
+                logResult(`Maintenance test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function createSampleData() {
+            try {
+                logResult('Creating sample data...', 'info');
+                const result = await apiCall('/api/sample-data', { method: 'POST' });
+                logResult('Sample data created successfully!', 'success');
+                
+                // Test dashboard again after creating data
+                setTimeout(() => {
+                    testDashboardLoad();
+                }, 1000);
+            } catch (error) {
+                logResult(`Sample data creation failed: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html> 
